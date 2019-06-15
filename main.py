@@ -2,6 +2,7 @@
 
 import argparse
 import enchant
+import string
 
 def decryption(args):
     input_list = readFile(args)
@@ -35,7 +36,6 @@ def decryption(args):
     encrypted = True
     while encrypted:
 
-
         if freq_lett_in >= len(freq_letters):
             break
 
@@ -46,27 +46,46 @@ def decryption(args):
             decrypted_word = ""
             for letter in word:
 
-                temp = index(letters[1], letter)
-
-                if (temp + distance) > (len(letters[0])-1):
-                    remainder = (temp + distance) - len(letters[0])
-                    decrypted_word += letters[1][remainder]
+                # Check if letter is Captial
+                if ord(letter) > 64 and ord(letter) < 91:
+                    # Make an index out of the decimal of the letter
+                    alphabet = letters[0]
+                    punctuation = False
+                # Check if letter is lowercase
+                elif ord(letter) > 96 and ord(letter) < 123:
+                    alphabet = letters[1]
+                    punctuation = False
                 else:
-                    decrypted_word += letters[1][temp+distance]
+                    decrypted_word += letter
+                    punctuation = True
+                    
+
+                if not punctuation:
+                    temp = index(letters[1], letter)
+
+                    if (temp + distance) > (len(alphabet)-1):
+                        remainder = (temp + distance) - len(alphabet)
+                        decrypted_word += alphabet[remainder]
+                    else:
+                        decrypted_word += alphabet[temp+distance]
+                else:
+                    continue
             
             decrypted.append(decrypted_word)
         
         print(decrypted)
-
+        
         encrypted = False
         for word in decrypted:
-            if dictionaryUK.check(word) or dictionaryUS.check(word):
+            word_test = word.translate(word.maketrans("","", string.punctuation))
+            if dictionaryUK.check(word_test) or dictionaryUS.check(word_test):
                 continue
             else:
                 encrypted = True
                 freq_lett_in += 1
                 decrypted = []
                 break
+
 
     if not encrypted:
         print("Decrypted")
@@ -90,32 +109,38 @@ def encryption(args, step):
         encrypted_word = []
         
         for letter in word:
+
             # Check if letter is Captial
             if ord(letter) > 64 and ord(letter) < 91:
                 
                 # Make an index out of the decimal of the letter
                 temp = ord(letter)-65
-
-                # Length check for letters list
-                if ((temp + step) > (len(letters[0])-1)) or ((temp+step) < 0):
-                    remainder = int((temp + step) % len(letters[0]))
-                    #remainder = (temp + step) - len(letters[0])
-                    #print(remainder)
-                    encrypted_word.append(letters[0][remainder])
-                else:
-                    encrypted_word.append(letters[0][temp+step])
+                alphabet = letters[0]
+                punctuation = False
 
             # Check if letter is lowercase
             elif ord(letter) > 96 and ord(letter) < 123:
                 temp = ord(letter)-97
+                alphabet = letters[1]
+                punctuation = False
+            
+            else:
+                encrypted_word.append(letter)
+                print(letter)
+                punctuation = True
+                
 
-                # Length check
-                if ((temp + step) > (len(letters[1])-1)) or ((temp + step) < 0):
-                    remainder = int((temp + step) % len(letters[1]))                    
-                    #remainder = (temp + step) - len(letters[1])
-                    encrypted_word.append(letters[1][remainder])
+            if not punctuation:
+                # Length check out-of-bound
+                if ((temp + step) > (len(alphabet))-1) or ((temp + step) < 0):
+                    
+                    # Fixes out-of-bound indexes
+                    remainder = int((temp + step) % len(alphabet))                    
+                    encrypted_word.append(alphabet[remainder])
                 else:
-                    encrypted_word.append(letters[1][temp+step])
+                    encrypted_word.append(alphabet[temp+step])
+            else:
+                continue
             
         # Add words to the encrypted list
         encrypted.append(encrypted_word)
@@ -126,8 +151,6 @@ def encryption(args, step):
 # Reads the input file and stores data in file_words and returns the list
 def readFile(args):
     file_words = []
-    letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
-
 
     with args.input as fileI:
         for line in fileI:
