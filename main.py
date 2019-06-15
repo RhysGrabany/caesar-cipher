@@ -1,13 +1,113 @@
 #!/usr/bin/python3
 
 import argparse
+import enchant
 
-def decrypt():
-    pass
+def decryption(args):
+    input_list = readFile(args)
+    info = longest(input_list)
+    
+    # All letters in the Eng alphabet
+    letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
+    freq_letters = "etaoinshrd"
 
-def encrypt():
-    pass
+    dictionaryUK = enchant.Dict("en_GB")
+    dictionaryUS = enchant.Dict("en_US")
 
+    decrypted = []
+
+    common = mostCommon(info[0])[0]
+
+    freq_lett_in = 0
+    encrypted = True
+    while encrypted:
+
+
+        if freq_lett_in >= len(freq_letters):
+            break
+
+        distance = index(letters[0], freq_letters[freq_lett_in]) - index(letters[0], common)
+        print(distance)
+
+        for word in input_list:
+            decrypted_word = ""
+            for letter in word:
+
+                temp = index(letters[1], letter)
+
+                if (temp + distance) > (len(letters[0])-1):
+                    remainder = (temp + distance) - len(letters[0])
+                    decrypted_word += letters[1][remainder]
+                else:
+                    decrypted_word += letters[1][temp+distance]
+            
+            decrypted.append(decrypted_word)
+        
+        print(decrypted)
+
+        encrypted = False
+        for word in decrypted:
+            if dictionaryUK.check(word) or dictionaryUS.check(word):
+                continue
+            else:
+                encrypted = True
+                freq_lett_in += 1
+                decrypted = []
+                break
+
+    if encrypted:
+        print("Decrypted")
+    else:
+        print("Can't be decrypted at this time")
+
+
+# Method for encrypting the input file based on steps provided
+def encryption(args, step):
+    # Loading the input filr into list
+    input_list = readFile(args)
+
+    # All letters in the Eng alphabet
+    letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
+    
+    # Encypted list before writing to file
+    encrypted = []
+
+    for word in input_list:
+        encrypted_word = []
+        
+        for letter in word:
+            # Check if letter is Captial
+            if ord(letter) > 64 and ord(letter) < 91:
+                
+                # Make an index out of the decimal of the letter
+                temp = ord(letter)-65
+
+                # Length check for letters list
+                if (temp + step) > (len(letters[0])-1):
+                    remainder = (temp + step) - len(letters[0])
+                    encrypted_word.append(letters[0][remainder])
+                else:
+                    encrypted_word.append(letters[0][temp+step])
+
+            # Check if letter is lowercase
+            elif ord(letter) > 96 and ord(letter) < 123:
+                temp = ord(letter)-97
+
+                # Length check
+                if (temp + step) > (len(letters[1])-1):
+                    remainder = (temp + step) - len(letters[1])
+                    encrypted_word.append(letters[1][remainder])
+                else:
+                    print(temp+step)
+                    encrypted_word.append(letters[1][temp+step])
+            
+        # Add words to the encrypted list
+        encrypted.append(encrypted_word)
+
+    # Write to file
+    writeFile(args, encrypted)
+
+# Reads the input file and stores data in file_words and returns the list
 def readFile(args):
     file_words = []
 
@@ -18,14 +118,73 @@ def readFile(args):
 
     return file_words
 
-
+# Writes input to file without the commas and brackets
 def writeFile(args, out):
+    
     with args.output as fileO:
         for word in out:
-            fileO.write(word + " ")
-            
+            for letter in word:
+                print(word)
+                fileO.write(" ".join(map(str, letter)))
+            fileO.write(" ")
+
+# Used to find the longest word to make decryption easier
+def longest(in_list):
+
+    size = 0
+
+    for word in in_list:
+        if len(word) > size:
+            size = len(word)
+            focus = word
+        else:
+            continue
+        
+    return focus, size
 
 
+# Method to find the most common letter for frequency analysis
+def mostCommon(in_word):
+
+    end_letter = False
+    ind = 0
+    most_freq = 0
+    comm_letter = 'a'
+
+    while not end_letter:
+
+        letter_focus = in_word[ind]
+        freq = 0
+
+        for letter in in_word:
+            if letter is letter_focus:
+                freq += 1
+            else:
+                continue
+        
+        if freq > most_freq:
+            most_freq = freq
+            comm_letter = letter_focus
+
+        ind += 1
+    
+        if ind >= len(in_word):
+            end_letter = True
+        else:
+            continue
+
+    return comm_letter, most_freq
+
+def index(word, letter):
+
+    lowered_word = word.lower()
+    lowered_letter = letter.lower()
+
+    for i in range(0, len(lowered_word)):
+        if lowered_word[i] == lowered_letter:
+            return i
+        else: 
+            continue
 
 # Arguments used in this program for input, output, steps, encrypt, and decrypt
 ap = argparse.ArgumentParser()
@@ -50,18 +209,11 @@ if isinstance(step, int):
 # check if encrypt and decrypt are used together
 if (decrypt and encrypt):
     ap.error("Only allowed either encrypt or decrypt one at a time")
+elif (not decrypt and not encrypt):
+    ap.error("Either encrypt or decrypt must be used")
 # 
-if (decrypt and stepCheck):
+if (decrypt and not stepCheck):
     ap.error("Program automatically decrypts, no need for step")
 
-print(arguments.input, arguments.output)
-
-input_words = readFile(arguments)
-
-print(input_words)
-
-writeFile(arguments, input_words)
-
-
-
+encryption(arguments, step) if encrypt else decryption(arguments)
 
