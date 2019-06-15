@@ -6,7 +6,7 @@ import string
 
 def decryption(args):
     input_list = readFile(args)
-    info = longest(input_list)
+    info = longest(input_list)[0]
 
     # All letters in the Eng alphabet
     letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
@@ -17,7 +17,8 @@ def decryption(args):
 
 
     for word in input_list:
-        if dictionaryUK.check(word) or dictionaryUS.check(word):
+        word_test = word.translate(word.maketrans("","", string.punctuation))
+        if dictionaryUK.check(word_test) or dictionaryUS.check(word_test):
             encrypted = False
             continue
         else:
@@ -30,7 +31,8 @@ def decryption(args):
 
     decrypted = []
 
-    common = mostCommon(info[0])[0]
+    stripped = info.translate(info.maketrans("","", string.punctuation))
+    common = mostCommon(stripped)[0]
 
     freq_lett_in = 0
     encrypted = True
@@ -38,6 +40,8 @@ def decryption(args):
 
         if freq_lett_in >= len(freq_letters):
             break
+        
+        print(common)
 
         distance = index(letters[0], freq_letters[freq_lett_in]) - index(letters[0], common)
         print(distance)
