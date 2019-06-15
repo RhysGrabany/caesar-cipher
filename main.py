@@ -9,7 +9,7 @@ def decryption(args):
 
     # All letters in the Eng alphabet
     letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
-    freq_letters = "etaoinshrd"
+    freq_letters = "etaoinshrdlcumwfgypbvkjxqz"
 
     dictionaryUK = enchant.Dict("en_GB")
     dictionaryUS = enchant.Dict("en_US")
@@ -97,8 +97,10 @@ def encryption(args, step):
                 temp = ord(letter)-65
 
                 # Length check for letters list
-                if (temp + step) > (len(letters[0])-1):
-                    remainder = (temp + step) - len(letters[0])
+                if ((temp + step) > (len(letters[0])-1)) or ((temp+step) < 0):
+                    remainder = int((temp + step) % len(letters[0]))
+                    #remainder = (temp + step) - len(letters[0])
+                    #print(remainder)
                     encrypted_word.append(letters[0][remainder])
                 else:
                     encrypted_word.append(letters[0][temp+step])
@@ -108,11 +110,11 @@ def encryption(args, step):
                 temp = ord(letter)-97
 
                 # Length check
-                if (temp + step) > (len(letters[1])-1):
-                    remainder = (temp + step) - len(letters[1])
+                if ((temp + step) > (len(letters[1])-1)) or ((temp + step) < 0):
+                    remainder = int((temp + step) % len(letters[1]))                    
+                    #remainder = (temp + step) - len(letters[1])
                     encrypted_word.append(letters[1][remainder])
                 else:
-                    print(temp+step)
                     encrypted_word.append(letters[1][temp+step])
             
         # Add words to the encrypted list
@@ -124,6 +126,8 @@ def encryption(args, step):
 # Reads the input file and stores data in file_words and returns the list
 def readFile(args):
     file_words = []
+    letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
+
 
     with args.input as fileI:
         for line in fileI:
