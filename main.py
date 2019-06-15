@@ -6,13 +6,26 @@ import enchant
 def decryption(args):
     input_list = readFile(args)
     info = longest(input_list)
-    
+
     # All letters in the Eng alphabet
     letters = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"]
     freq_letters = "etaoinshrd"
 
     dictionaryUK = enchant.Dict("en_GB")
     dictionaryUS = enchant.Dict("en_US")
+
+
+    for word in input_list:
+        if dictionaryUK.check(word) or dictionaryUS.check(word):
+            encrypted = False
+            continue
+        else:
+            encrypted = True
+            break
+    
+    if not encrypted:
+        writeFile(args, input_list)
+        return
 
     decrypted = []
 
@@ -55,8 +68,9 @@ def decryption(args):
                 decrypted = []
                 break
 
-    if encrypted:
+    if not encrypted:
         print("Decrypted")
+        writeFile(args, decrypted)
     else:
         print("Can't be decrypted at this time")
 
