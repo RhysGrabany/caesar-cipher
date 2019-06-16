@@ -41,10 +41,7 @@ def decryption(args):
         if freq_lett_in >= len(freq_letters):
             break
         
-        print(common)
-
         distance = index(letters[0], freq_letters[freq_lett_in]) - index(letters[0], common)
-        print(distance)
 
         for word in input_list:
             decrypted_word = ""
@@ -76,9 +73,7 @@ def decryption(args):
                     continue
             
             decrypted.append(decrypted_word)
-        
-        print(decrypted)
-        
+                
         encrypted = False
         for word in decrypted:
             word_test = word.translate(word.maketrans("","", string.punctuation))
@@ -130,7 +125,6 @@ def encryption(args, step):
             
             else:
                 encrypted_word.append(letter)
-                print(letter)
                 punctuation = True
                 
 
@@ -169,7 +163,6 @@ def writeFile(args, out):
     with args.output as fileO:
         for word in out:
             for letter in word:
-                print(word)
                 fileO.write(" ".join(map(str, letter)))
             fileO.write(" ")
 
